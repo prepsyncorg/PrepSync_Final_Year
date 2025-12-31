@@ -1,0 +1,36 @@
+# ---- SYSTEM & IDE ----
+.idea/
+.vscode/
+*.iml
+*.log
+.DS_Store
+Thumbs.db
+
+# ---- PYTHON BACKEND (prepsync_backend/) ----
+# Ignore virtual environment and cache
+**/venv/
+**/__pycache__/
+**/*.pyc
+
+# Ignore local database (prevents overwriting teammate data)
+**/database.db
+
+# ---- FLUTTER FRONTEND (prepsync/) ----
+# Ignore massive build artifacts and tool folders
+**/build/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.pub-cache/
+**/.pub/
+
+# ---- SECURITY (CRITICAL) ----
+# These must be downloaded by each teammate from Firebase
+**/google-services.json
+**/local.properties
+
+# ---- OVERSIZED ASSETS ----
+# Blocking files over 100MB to prevent GitHub rejection
+prepsync/assets/logo/icon.png
+prepsync/android/app/src/main/res/drawable-xxxhdpi/splash.png
+prepsync/android/app/src/main/res/drawable-xxhdpi/splash.png

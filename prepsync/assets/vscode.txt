@@ -1,0 +1,69 @@
+===========================================================================
+🚀 PREPSYNC 2025 MASTER CHEAT SHEET (DESKTOP VERSION)
+===========================================================================
+Project Location: C:\Users\yashr\Desktop\Final Year project
+
+--- PART 1: START THE BACKEND SERVER ---
+(Terminal #1: Keep this running for the app to work)
+
+# 1. Go to backend folder
+cd "C:\Users\yashr\Desktop\Final Year project\prepsync_backend"
+
+# 2. Activate virtual environment 
+.\venv\Scripts\Activate
+
+# 3. Install missing libraries (only if you get ModuleErrors)
+pip install flask flask-sqlalchemy flask-cors firebase-admin
+
+# 4. Start Python API
+python app.py
+
+# IMPORTANT: Ensure lib/api_config.dart matches your PC IP
+
+---------------------------------------------------------------------------
+
+--- PART 2: RUN ON PHYSICAL PHONE ---
+(Terminal #2: Connect phone via USB. Enable USB Debugging in Settings)
+
+# 1. Confirm phone is detected
+flutter devices
+
+# 2. Go to frontend folder
+cd "C:\Users\yashr\Desktop\Final Year project\prepsync"
+
+# 3. Run with Windows Security Bypass
+flutter run --no-enable-impeller
+
+---------------------------------------------------------------------------
+
+--- PART 3: RUN ON EMULATOR (PIXEL 9) ---
+(Use this if physical phone is disconnected)
+
+# 1. Launch Pixel 9
+flutter emulators --launch Pixel_9
+
+# 2. Go to frontend folder
+cd "C:\Users\yashr\Desktop\Final Year project\prepsync"
+
+# 3. Run with Security Bypass
+flutter run --no-enable-impeller
+
+---------------------------------------------------------------------------
+
+--- PART 4: FIREBASE & SECURITY UPDATES ---
+(Run these only if Sign-In fails or you use a different PC)
+
+# 1. Generate new SHA-1 Keys
+cd "C:\Users\yashr\Desktop\Final Year project\prepsync\android"
+./gradlew signingReport
+
+# 2. Add SHA-1 to Firebase Console > Project Settings
+
+# 3. Replace google-services.json in: prepsync/android/app/
+
+# 4. Refresh Flutter Project
+cd "C:\Users\yashr\Desktop\Final Year project\prepsync"
+flutter clean
+flutter pub get
+
+===========================================================================
