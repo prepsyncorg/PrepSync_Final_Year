@@ -1,4 +1,3 @@
-// lib/dashboard_screen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -9,10 +8,9 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:prepsync/login_screen.dart';
-
-// NEW: Import your config and the new chat screen
 import 'package:prepsync/api_config.dart';
 import 'package:prepsync/chat_screen.dart';
+import 'package:prepsync/resume_analyzer_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final int userId;
@@ -35,11 +33,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _fetchDashboardData() async {
     try {
-      // UPDATED: Now using baseUrl from api_config.dart instead of hardcoded IP
       final responses = await Future.wait([
         http.get(Uri.parse('$baseUrl/profile/${widget.userId}')),
         http.get(Uri.parse('$baseUrl/performance/${widget.userId}')),
       ]);
+
+      if (!mounted) return;
 
       if (responses[0].statusCode == 200) {
         final profileData = json.decode(responses[0].body);
@@ -50,7 +49,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         final perfData = json.decode(responses[1].body);
         setState(() {
           _performanceData = {
+            // Using REAL stored data for Resume
             "Resume": (perfData['resume_score'] as num).toDouble(),
+            // Mock data for other modules (until we build them)
             "Aptitude": (perfData['aptitude_avg'] as num).toDouble() / 10.0,
             "Interview": (perfData['interview_avg'] as num).toDouble(),
             "Communication": (perfData['communication_avg'] as num).toDouble() / 10.0,
@@ -58,7 +59,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         });
       }
     } catch (e) {
-      // Ignore silent errors
+      // Handle error
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -125,7 +126,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                // UPDATED: Floating Action Button now navigates to ChatScreen
                 FloatingActionButton(
                   onPressed: () {
                     Navigator.push(
@@ -217,11 +217,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildModuleList() {
+    // 1. DYNAMIC SCORE LOGIC
+    int resumeScore = (_performanceData['Resume'] ?? 0).toInt();
+    String scoreText = resumeScore > 0 ? 'Score: $resumeScore/100' : 'No Resume Uploaded';
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
-          _buildModuleCard('AI Resume Analyzer', 'Score: 8/10', const Color(0xFF4A90E2), Icons.description),
+          // 2. RESUME CARD (Uses dynamic score & refreshes on return)
+          _buildModuleCard(
+            'AI Resume Analyzer', 
+            scoreText, 
+            const Color(0xFF4A90E2), 
+            Icons.description,
+            onTap: () async {
+              // Wait for user to return
+              await Navigator.push(
+                context, 
+                MaterialPageRoute(builder: (context) => ResumeAnalyzerScreen(userId: widget.userId))
+              );
+              // Refresh dashboard when they come back
+              _fetchDashboardData();
+            }
+          ),
+          
           _buildModuleCard('Aptitude Test Generator', 'Next Test: Math & Logic', const Color(0xFF7B61FF), Icons.lightbulb_outline),
           _buildModuleCard('Mock Interview Simulator', 'Last Session: Technical Interview', const Color(0xFFF5A623), Icons.mic_none),
           _buildModuleCard('Workplace Communication', 'Master Tricky Scenarios', const Color(0xFF50E3C2), Icons.people_outline),
@@ -230,7 +250,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildModuleCard(String title, String subtitle, Color color, IconData icon) {
+  Widget _buildModuleCard(String title, String subtitle, Color color, IconData icon, {VoidCallback? onTap}) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 4,
@@ -238,7 +258,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
-        onTap: () {},
+        onTap: onTap ?? () {}, 
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
           child: Row(
@@ -295,7 +315,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return BarChart(
       BarChartData(
         alignment: BarChartAlignment.spaceAround,
-        maxY: 10,
+        maxY: 100, 
         barTouchData: BarTouchData(enabled: false),
         titlesData: FlTitlesData(
           bottomTitles: AxisTitles(
